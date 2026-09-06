@@ -24,6 +24,8 @@ class Config(BaseSettings):
 
     TELEGRAM_BOT_TOKEN: str
     MY_TELEGRAM_CHAT_ID: int
+    TELEGRAM_API_ID: int = 0
+    TELEGRAM_API_HASH: str = ""
 
     SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: int = 587

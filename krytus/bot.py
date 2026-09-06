@@ -15,6 +15,8 @@ from krytus.reminders import (
     init_database,
     mark_reminder_delivered,
 )
+from krytus.voice import handle_voice_message, voice_command
+from krytus.voice_call import handle_call_command
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +136,19 @@ async def reminders_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     await update.message.reply_text(text, parse_mode="Markdown")
 
 
+async def call_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not await auth_middleware(update, context):
+        return
+    chat_id = update.effective_chat.id
+    result = await handle_call_command(
+        chat_id,
+        config.TELEGRAM_BOT_TOKEN,
+        config.TELEGRAM_API_ID,
+        config.TELEGRAM_API_HASH,
+    )
+    await update.message.reply_text(result)
+
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not await auth_middleware(update, context):
         return
@@ -196,6 +211,9 @@ def create_application() -> Application:
     application.add_handler(CommandHandler("health", health_command))
     application.add_handler(CommandHandler("memory", memory_command))
     application.add_handler(CommandHandler("reminders", reminders_command))
+    application.add_handler(CommandHandler("voice", voice_command))
+    application.add_handler(CommandHandler("call", call_command))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    application.add_handler(MessageHandler(filters.VOICE, handle_voice_message))
 
     return application
